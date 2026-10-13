@@ -3,8 +3,8 @@
 }
 
 body{
-    font-family: system-ui, sans-serif;
-    max-width: 900px;
+    font-family: Arial;
+    max-width: 600px;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -25,16 +25,6 @@ body{
 
 #error_login{
     color: red;
-}
-
-#contenido_panel{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-#perfil, #tareas{
-    flex: 1 1 300px; 
 }
 
 #perfil_foto{
