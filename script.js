@@ -22,6 +22,12 @@ const btnCerrarSesion = document.getElementById('btn_cerrar_sesion');
 // Tareas
 const estado = document.getElementById('estado');
 const listaTareas = document.getElementById('lista_tareas');
+const buscador = document.getElementById('buscador');
+const filtroTodas = document.getElementById('filtro_todas');
+const filtroPendientes = document.getElementById('filtro_pendientes');
+const filtroCompletadas = document.getElementById('filtro_completadas');
+const formAgregar = document.getElementById('form_agregar');
+const inputNuevaTarea = document.getElementById('nueva_tarea');
 
 // Resumen
 const resumenTotal = document.getElementById('total');
@@ -31,6 +37,7 @@ const resumenPorcentaje = document.getElementById('porcentaje');
 
 let usuario = null;
 let tareas = [];
+let filtro = 'todas';
 
 async function traer(url, opciones = {}) {
     const res = await fetch(url, opciones);
@@ -96,12 +103,14 @@ function crearItem(tarea) {
     const casilla = document.createElement('input');
     casilla.type = 'checkbox';
     casilla.checked = tarea.completed;
+    casilla.addEventListener('click', () => marcarTarea(tarea.id));
 
     const texto = document.createElement('span');
     texto.textContent = tarea.todo;
 
     const btnEliminar = document.createElement('button');
     btnEliminar.textContent = 'Eliminar';
+    btnEliminar.addEventListener('click', () => eliminarTarea(tarea.id));
 
     li.appendChild(casilla);
     li.appendChild(texto);
@@ -110,10 +119,63 @@ function crearItem(tarea) {
     return li;
 }
 
+async function marcarTarea(id) {
+    const tarea = tareas.find(t => t.id === id);
+    const nuevoEstado = !tarea.completed;
+
+    try {
+        // las tareas agregadas por nosotros no existen en el servidor
+        if (!tarea.local) {
+            await traer(`${API}/todos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completed: nuevoEstado })
+            });
+        }
+
+        tarea.completed = nuevoEstado;
+        pintarLista();
+    } catch (err) {
+        pintarLista();
+        estado.textContent = `No se pudo actualizar la tarea (${err.message})`;
+    }
+}
+
+async function eliminarTarea(id) {
+    const tarea = tareas.find(t => t.id === id);
+
+    try {
+        if (!tarea.local) {
+            await traer(`${API}/todos/${id}`, { method: 'DELETE' });
+        }
+
+        tareas = tareas.filter(t => t.id !== id);
+        pintarLista();
+    } catch (err) {
+        estado.textContent = `No se pudo eliminar la tarea (${err.message})`;
+    }
+}
+
+function tareasVisibles() {
+    const texto = buscador.value.toLowerCase();
+
+    return tareas
+        .filter(tarea => {
+            if (filtro === 'pendientes') return !tarea.completed;
+            if (filtro === 'completadas') return tarea.completed;
+            return true;
+        })
+        .filter(tarea => tarea.todo.toLowerCase().includes(texto))
+        .sort((a, b) => b.id - a.id);
+}
+
 function pintarLista() {
     listaTareas.innerHTML = '';
 
-    const items = tareas.map(crearItem);
+    const visibles = tareasVisibles();
+    estado.textContent = visibles.length === 0 ? 'No hay tareas para mostrar' : '';
+
+    const items = visibles.map(crearItem);
     items.forEach(li => listaTareas.appendChild(li));
 
     actualizarResumen();
@@ -163,6 +225,40 @@ btnCerrarSesion.addEventListener('click', () => {
     usuario = null;
     inputContrasena.value = '';
     mostrarLogin();
+});
+
+function cambiarFiltro(nuevoFiltro) {
+    filtro = nuevoFiltro;
+    pintarLista();
+}
+
+filtroTodas.addEventListener('click', () => cambiarFiltro('todas'));
+filtroPendientes.addEventListener('click', () => cambiarFiltro('pendientes'));
+filtroCompletadas.addEventListener('click', () => cambiarFiltro('completadas'));
+
+buscador.addEventListener('input', pintarLista);
+
+formAgregar.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+
+    try {
+        const nueva = await traer(`${API}/todos/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                todo: inputNuevaTarea.value,
+                completed: false,
+                userId: usuario.id
+            })
+        });
+
+        // DummyJSON siempre regresa el mismo id, por eso le ponemos uno propio
+        tareas.push({ ...nueva, id: Date.now(), local: true });
+        inputNuevaTarea.value = '';
+        pintarLista();
+    } catch (err) {
+        estado.textContent = `No se pudo agregar la tarea (${err.message})`;
+    }
 });
 
 if (localStorage.getItem('token')) {
