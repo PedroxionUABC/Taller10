@@ -21,12 +21,66 @@
                 <label for="contrasena">Contraseña:</label>
                 <input type="password" id="contrasena" name="contrasena" placeholder="Contraseña" required>
 
-                <p id="error_login" aria-live="polite"></p>
+                <p id="error_login"></p>
 
                 <button type="submit" id="btn_entrar">Iniciar sesion</button>
             </form>
 
         </div>
+    </div>
+
+    <div id="pantalla_panel" hidden>
+        <header>
+            <h1>Mi panel</h1>
+            <button id="btn_cerrar_sesion">Cerrar sesion</button>
+        </header>
+
+        <main id="contenido_panel">
+            <section id="perfil">
+                <h2>Mi perfil</h2>
+                <img id="perfil_foto" alt="Foto de perfil">
+                <p><strong>Nombre:</strong> <span id="perfil_nombre"></span></p>
+                <p><strong>Correo:</strong> <span id="perfil_correo"></span></p>
+                <p><strong>Edad:</strong> <span id="perfil_edad"></span></p>
+                <p><strong>Telefono:</strong> <span id="perfil_telefono"></span></p>
+            </section>
+
+            <section id="tareas">
+                <h2>Mis tareas</h2>
+
+                <div id="resumen">
+                    <p><strong>Total:</strong> <span id="total">0</span></p>
+                    <p><strong>Completadas:</strong> <span id="completadas">0</span></p>
+                    <p><strong>Pendientes:</strong> <span id="pendientes">0</span></p>
+                    <p><strong>Avance:</strong> <span id="porcentaje">0</span>%</p>
+                </div>
+
+                <form id="form_agregar">
+                    <label for="nueva_tarea">Nueva tarea:</label>
+                    <input type="text" id="nueva_tarea" name="nueva_tarea" placeholder="Escribe una tarea" required>
+                    <button type="submit">Agregar</button>
+                </form>
+
+                <fieldset>
+                    <legend>Mostrar</legend>
+
+                    <input type="radio" id="filtro_todas" name="filtro" value="todas" checked>
+                    <label for="filtro_todas">Todas</label>
+
+                    <input type="radio" id="filtro_pendientes" name="filtro" value="pendientes">
+                    <label for="filtro_pendientes">Pendientes</label>
+
+                    <input type="radio" id="filtro_completadas" name="filtro" value="completadas">
+                    <label for="filtro_completadas">Completadas</label>
+                </fieldset>
+
+                <label for="buscador">Buscar:</label>
+                <input type="text" id="buscador" name="buscador" placeholder="Buscar tarea">
+
+                <p id="estado"></p>
+                <ul id="lista_tareas"></ul>
+            </section>
+        </main>
     </div>
 
 </body>

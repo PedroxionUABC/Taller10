@@ -1,13 +1,48 @@
-#pantalla_login{
-    display: flex;
-    justify-content: center;
-    align-items: center;
+* {
+    box-sizing: border-box;
+}
+
+body{
+    font-family: system-ui, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 #contenedor_login{
-    flex:1;
-    gap: 20px;
+    max-width: 400px;
+    margin: 40px auto;
     border-width: 2px;
     border-style: solid;
     padding: 20px;
+}
+
+#form_login{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#error_login{
+    color: red;
+}
+
+#contenido_panel{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+#perfil, #tareas{
+    flex: 1 1 300px; 
+}
+
+#perfil_foto{
+    width: 120px;
+}
+
+#resumen{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
