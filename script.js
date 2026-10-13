@@ -1,12 +1,17 @@
 const API = 'https://dummyjson.com';
 
+// Pantallas
 const pantallaLogin = document.getElementById('pantalla_login');
 const pantallaPanel = document.getElementById('pantalla_panel');
+
+// Login
 const formLogin = document.getElementById('form_login');
 const inputUsuario = document.getElementById('usuario');
 const inputContrasena = document.getElementById('contrasena');
 const errorLogin = document.getElementById('error_login');
 const btnEntrar = document.getElementById('btn_entrar');
+
+// Perfil
 const perfilFoto = document.getElementById('perfil_foto');
 const perfilNombre = document.getElementById('perfil_nombre');
 const perfilCorreo = document.getElementById('perfil_correo');
@@ -14,7 +19,18 @@ const perfilEdad = document.getElementById('perfil_edad');
 const perfilTelefono = document.getElementById('perfil_telefono');
 const btnCerrarSesion = document.getElementById('btn_cerrar_sesion');
 
+// Tareas
+const estado = document.getElementById('estado');
+const listaTareas = document.getElementById('lista_tareas');
+
+// Resumen
+const resumenTotal = document.getElementById('total');
+const resumenCompletadas = document.getElementById('completadas');
+const resumenPendientes = document.getElementById('pendientes');
+const resumenPorcentaje = document.getElementById('porcentaje');
+
 let usuario = null;
+let tareas = [];
 
 async function traer(url, opciones = {}) {
     const res = await fetch(url, opciones);
@@ -50,6 +66,7 @@ async function cargarPanel() {
         perfilTelefono.textContent = phone;
 
         mostrarPanel();
+        cargarTareas();
     } catch (err) {
         if (err.message === '401') {
             localStorage.removeItem('token');
@@ -58,6 +75,58 @@ async function cargarPanel() {
         }
         mostrarLogin();
     }
+}
+
+async function cargarTareas() {
+    estado.textContent = 'Cargando tareas...';
+
+    try {
+        const { todos } = await traer(`${API}/todos/user/${usuario.id}`);
+        tareas = todos;
+        estado.textContent = '';
+        pintarLista();
+    } catch (err) {
+        estado.textContent = `No se pudieron cargar las tareas (${err.message})`;
+    }
+}
+
+function crearItem(tarea) {
+    const li = document.createElement('li');
+
+    const casilla = document.createElement('input');
+    casilla.type = 'checkbox';
+    casilla.checked = tarea.completed;
+
+    const texto = document.createElement('span');
+    texto.textContent = tarea.todo;
+
+    const btnEliminar = document.createElement('button');
+    btnEliminar.textContent = 'Eliminar';
+
+    li.appendChild(casilla);
+    li.appendChild(texto);
+    li.appendChild(btnEliminar);
+
+    return li;
+}
+
+function pintarLista() {
+    listaTareas.innerHTML = '';
+
+    const items = tareas.map(crearItem);
+    items.forEach(li => listaTareas.appendChild(li));
+
+    actualizarResumen();
+}
+
+function actualizarResumen() {
+    const total = tareas.length;
+    const completadas = tareas.reduce((cuenta, tarea) => tarea.completed ? cuenta + 1 : cuenta, 0);
+
+    resumenTotal.textContent = total;
+    resumenCompletadas.textContent = completadas;
+    resumenPendientes.textContent = total - completadas;
+    resumenPorcentaje.textContent = total === 0 ? 0 : (completadas / total * 100).toFixed(0);
 }
 
 formLogin.addEventListener('submit', async (evento) => {
