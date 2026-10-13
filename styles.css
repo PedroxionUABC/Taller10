@@ -1,3 +1,13 @@
+#pantalla_login{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #contenedor_login{
+    flex:1;
+    gap: 20px;
     border-width: 2px;
+    border-style: solid;
+    padding: 20px;
 }
